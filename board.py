@@ -17,11 +17,10 @@ app.layout = html.Div([
     dbc.Row(
         dbc.Col([
             dcc.Upload([html.Div([
-                html.Br(),
-                html.H5('Arraste os arquivos aqui, ou clique'),
-                html.Br()
+                html.H5('Arraste os arquivos aqui, ou clique')
                 ])
-            ], id='upload', style = {'borderStyle' : 'dashed'}, multiple=True)],
+            ], id='upload', style = {'borderStyle' : 'dashed'}, multiple=True),
+            html.Br()],
             style = {'textAlign': 'center'}, width=4
         ), justify = 'center' #Final da coluna 1
     ), # Final da linha 1
@@ -36,47 +35,41 @@ app.layout = html.Div([
 ], style = {'padding': '10px 20px 10px 20px'}
 )
 
-def parse_contents(contents, filename, date):
+
+def parse_contents(contents):
     content_type, content_string = contents.split(',')
     decoded = base64.b64decode(content_string)
     try:
-        if 'csv' in filename:
-            df = pd.read_csv(
-                io.StringIO(decoded.decode('utf-8')), header = 0)
-        elif 'xls' in filename:
-            df = pd.read_excel(io.BytesIO(decoded), header = 0)
-    except Exception as e:
-        print(e)
+        df = pd.read_csv(
+            io.StringIO(decoded.decode('utf-8')), header = 0)
+    except:
         return html.Div([
             'There was an error processing this file.'
         ])
     return df
 
+@app.callback(Output('store', 'data'),
+              Input('upload', 'contents'))
+def upload(cont):
+    if cont is not None:
+        conteudos = [parse_contents(c) for c in cont]
+        return pd.concat(conteudos, ignore_index=True)
+
 @app.callback(Output('tab', 'children'),
-              Input('upload', 'contents'),
-              State('upload', 'filename'),
-              State('upload', 'last_modified'))
-def update_output(list_of_contents, list_of_names, list_of_dates):
+              Input('store', 'data'))
+def update_output(list_of_contents):
     if list_of_contents is not None:
-        conteudos = [
-            parse_contents(c, n, d) for c, n, d in
-            zip(list_of_contents, list_of_names, list_of_dates)]
-        df_final = pd.concat(conteudos, ignore_index=True)
+        df_final = list_of_contents
         tabela = dash_table.DataTable(
             data=df_final.to_dict('records'),
             columns=[{'name': i, 'id': i} for i in df_final.columns])
         return tabela
 
 @app.callback(Output('grafico', 'figure'),
-              Input('upload', 'contents'),
-              State('upload', 'filename'),
-              State('upload', 'last_modified'))
-def update_output(list_of_contents, list_of_names, list_of_dates):
+              Input('store', 'data'))
+def update_output(list_of_contents):
     if list_of_contents is not None:
-        conteudos = [
-            parse_contents(c, n, d) for c, n, d in
-            zip(list_of_contents, list_of_names, list_of_dates)]
-        df_final = pd.concat(conteudos, ignore_index=True)
+        df_final = list_of_contents
         grafico = px.histogram(df_final['Total'])
         return grafico
     else:

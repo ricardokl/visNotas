@@ -13,7 +13,6 @@ import plotly.express as px
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.SKETCHY])
 
 app.layout = html.Div([
-    dcc.Store(id='store'),
     dbc.Row(
         dbc.Col([
             dcc.Upload([html.Div([
@@ -48,30 +47,27 @@ def parse_contents(contents):
         ])
     return df
 
-@app.callback(Output('store', 'data'),
+@app.callback(Output('grafico', 'figure'),
               Input('upload', 'contents'))
 def upload(cont):
     if cont is not None:
         conteudos = [parse_contents(c) for c in cont]
-        return pd.concat(conteudos, ignore_index=True)
+        tot = pd.concat(conteudos, ignore_index=True)
+        grafico = px.histogram(tot['Total'])
+        return grafico
+    else:
+        return dash.no_update
 
 @app.callback(Output('tab', 'children'),
-              Input('store', 'data'))
-def update_output(list_of_contents):
-    if list_of_contents is not None:
-        df_final = list_of_contents
+              Input('upload', 'contents'))
+def update_output(cont):
+    if cont is not None:
+        conteudos = [parse_contents(c) for c in cont]
+        tot = pd.concat(conteudos, ignore_index=True)
         tabela = dash_table.DataTable(
-            data=df_final.to_dict('records'),
-            columns=[{'name': i, 'id': i} for i in df_final.columns])
-        return tabela
-
-@app.callback(Output('grafico', 'figure'),
-              Input('store', 'data'))
-def update_output(list_of_contents):
-    if list_of_contents is not None:
-        df_final = list_of_contents
-        grafico = px.histogram(df_final['Total'])
-        return grafico
+            data=tot.to_dict('records'),
+            columns=[{'name': i, 'id': i} for i in tot.columns])
+        return html.Div([tabela])
     else:
         return dash.no_update
 

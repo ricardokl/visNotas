@@ -1,44 +1,26 @@
-import random
-import numpy as np
+from numpy.random import normal
 import faker
 
-fake = faker.Faker()
+fake = faker.Faker('pt_BR')
+nomes = [fake.name() for _ in range(90)]
 
-nota01 = list(np.random.normal(loc=5, scale=1, size = 30))
-faltas01 = list(np.random.normal(loc=5, scale=1, size = 30))
-nota02 = list(np.random.normal(loc=5, scale=1, size = 30))
-faltas02 = list(np.random.normal(loc=5, scale=1, size = 30))
-nota03 = list(np.random.normal(loc=5, scale=1, size = 30))
-faltas03 = list(np.random.normal(loc=5, scale=1, size = 30))
-nota04 = list(np.random.normal(loc=5, scale=1, size = 30))
-faltas04 = list(np.random.normal(loc=5, scale=1, size = 30))
-nota05 = list(np.random.normal(loc=5, scale=1, size = 30))
-faltas05 = list(np.random.normal(loc=5, scale=1, size = 30))
-nota06 = list(np.random.normal(loc=5, scale=1, size = 30))
-faltas06 = list(np.random.normal(loc=5, scale=1, size = 30))
-nota07 = list(np.random.normal(loc=5, scale=1, size = 30))
-faltas07 = list(np.random.normal(loc=5, scale=1, size = 30))
-nota08 = list(np.random.normal(loc=5, scale=1, size = 30))
-faltas08 = list(np.random.normal(loc=5, scale=1, size = 30))
-nota09 = list(np.random.normal(loc=5, scale=1, size = 30))
-faltas09 = list(np.random.normal(loc=5, scale=1, size = 30))
-nota10 = list(np.random.normal(loc=5, scale=1, size = 30))
-faltas10 = list(np.random.normal(loc=5, scale=1, size = 30))
-nomes = [fake.name() for i in range(30)]
+for i in range(3):
+    notas = normal(loc=5, scale=1, size = [10,90]).transpose()
+    faltas = normal(loc=5, scale=1, size = [10,90])
 
-notas = input()
+    notas_str = [','.join([f"{notas[i][j]:.2f}" for j in range(10)]) for i in range(90)]
+    
+    header = ','.join(["Nome"] + [f"disc{i:02}" for i in range(1,11)])
 
-with open(notas,'w') as f:
-    f.write('Nome,disciplina01.disciplina02,disciplina03,disciplina04,disciplina05,disciplina06,disciplina07,disciplina08,disciplina09,disciplina10,')
-    for i in range(30):
-        f.write(nomes[i]+','+
-            str(nota01[i])+','+
-            str(nota02[i])+','+
-            str(nota03[i])+','+
-            str(nota04[i])+','+
-            str(nota05[i])+','+
-            str(nota06[i])+','+
-            str(nota07[i])+','+
-            str(nota08[i])+','+
-            str(nota09[i])+','+
-            str(nota10[i])+'\n')
+    arquivo_notas = f"notas{i}.csv"
+
+    with open(arquivo_notas,'w') as f:
+        f.write(header+'\n')
+        for i in range(90):
+            f.write(nomes[i]+','+notas_str[i]+'\n')
+        
+
+    arquivo_faltas = f"faltas{i}.csv"
+
+    with open(arquivo_faltas,'w') as f:
+        f.write(header+'\n')

@@ -9,6 +9,7 @@ import io
 import plotly.graph_objects as go
 
 # Teste
+# Teste 2
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.SKETCHY])
 
